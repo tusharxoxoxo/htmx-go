@@ -18,7 +18,7 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 
 func newTemplate() *Templates {
     return &Templates{
-        templates: template.Must(template.ParseGlob("view/*.html")),
+        templates: template.Must(template.ParseGlob("views/*.html")),
     }
 }
 
@@ -34,8 +34,12 @@ func main(){
     e.Renderer = newTemplate()
 
     e.GET("/", func (c echo.Context) error{
-        count.Count++
         return c.Render(200, "index", count)
+    })
+    
+    e.POST("/count", func (c echo.Context) error{
+        count.Count++
+        return c.Render(200, "count", count)
     })
 
     e.Logger.Fatal(e.Start(":42069"))
