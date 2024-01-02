@@ -42,6 +42,15 @@ func newContact(name, email string) Contact{
 
 type Contacts = []Contact
 
+func (d *Data) hasEmail(email string) bool{
+    for _, contact := range d.Contacts{
+        if(contact.Email == email){
+            return true
+        }
+    }
+    return false
+}
+
 type Data struct{
     Contacts Contacts
 }
@@ -52,6 +61,20 @@ func newData() Data{
             newContact("Salman", "chotiheight@driver.com"),
             newContact("Ashwariya", "robot@shivaji.com"),
         },
+    }
+}
+
+
+type FormData struct{
+    Values map[string]string
+    Errors map[string]string
+}
+
+
+func newFormData() FormData{
+    return FormData{
+        Values: make(map[string]string),
+        Errors: make(map[string]string),
     }
 }
 
@@ -69,6 +92,10 @@ func main(){
     e.POST("/contacts", func (c echo.Context) error{
         name := c.FormValue("name")
         email := c.FormValue("email")
+
+        if data.hasEmail(email){
+            return c.Render(400, "form", data)
+        }
 
         data.Contacts = append(data.Contacts, newContact(name, email))
         return c.Render(200, "display", data)
