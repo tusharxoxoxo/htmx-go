@@ -23,6 +23,10 @@
     email: <input 
     {{ if .Values.email }} value = "{{ .Values.email }}" {{ end }}
     type="text" name = "email" />
+
+    {{ if .Errors.email }} 
+    <div style = "color: red">{{ .Errors.email }} </div>
+    {{ end }}
     <button type="submit">Create Contact</button>
 </form>
 {{ end }}

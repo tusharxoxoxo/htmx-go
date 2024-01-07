@@ -94,7 +94,12 @@ func main(){
         email := c.FormValue("email")
 
         if data.hasEmail(email){
-            return c.Render(400, "form", data)
+            formData := newFormData()
+            formData.Values["name"] = name
+            formData.Values["email"] = email
+            formData.Errors["email"] = "Email already exists"
+            
+            return c.Render(400, "form", formData)
         }
 
         data.Contacts = append(data.Contacts, newContact(name, email))
