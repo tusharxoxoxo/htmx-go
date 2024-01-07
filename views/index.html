@@ -8,15 +8,48 @@
         <script src = "https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
     </head>
     <body>
-        {{ template "form" .}}
+        {{ template "form" .Form}}
         <hr />
-        {{ template "display" .}}
+        {{ template "display" .Data}}
+
+        <script>
+            // **Event listener to handle HTMX 422 responses for form re-rendering**
+//
+// This code addresses a specific HTMX behavior where form submissions
+// with invalid data (resulting in 422 status codes) might not trigger
+// automatic re-rendering of the form with error messages.
+//
+// It works by:
+// 1. **Attaching an event listener:**
+//   - Listens for the `htmx:beforeSwap` event, which fires before HTMX
+//     swaps in a new response.
+// 2. **Checking for 422 status:**
+//   - If the event's `xhr.status` is 422 (indicating invalid form data):
+//     - Sets `evt.detail.shouldSwap` to `true`, forcing HTMX to swap
+//       the content despite the error status.
+//     - Sets `evt.detail.isError` to `false` to suppress unnecessary
+//       error logging in the console.
+//
+            document.addEventListener("DOMContentLoaded", (event) => {
+                document.body.addEventListener('htmx:beforeSwap', function (evt) {
+                    if(evt.detail.xhr.status === 422) {
+                        //allow 422 responses to swap for form re-rendering
+
+                        //set isErrror to false to avoid logging in console
+                        // Suppress console error logging
+                        evt.detail.shouldSwap = true;
+                        evt.detail.isErrror = false;
+                    }
+                });
+            })
+       </script>
+
     </body>
 </html>
 {{ end }}
 
 {{ block "form" . }}
-<form hx-swap = "outerHTML" hx-target = "#contacts" hx-post = "/contacts">
+<form hx-swap = "outerHTML" hx-post = "/contacts">
     name: <input
     {{ if .Values.name }} value = "{{ .Values.name }}" {{ end }}
     type="text" name = "name" />
@@ -33,9 +66,21 @@
 
 {{ block "display" . }}
 <div id = "contacts" style="display: flex; flex-direction: column">
-    {{range .Contacts}}
+    {{range .Contacts }}
+        {{ template "contact" . }}
+   {{end}} 
+</div>
+{{ end }}
+
+{{ block "contact" . }}
+    <div>
         Name: <span>{{ .Name }}</span>
         Email: <span>{{ .Email }}</span>
-    {{end}} 
-</div>
+    </div>
+{{ end }}
+
+{{ block "obb-contact" . }}
+    <div id = "contacts" hx-swap-oob="afterbegin">
+        {{ template "contact" . }}
+    </div>
 {{ end }}
